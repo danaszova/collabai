@@ -3,7 +3,7 @@
 import Stripe from "stripe";
 import {v} from "convex/values";
 
-import { action } from "./_generated/server";
+import { action, internalAction } from "./_generated/server";
 
 const url = process.env.NEXT_PUBLIC_APP_URL;
 
@@ -60,4 +60,35 @@ return session.url!;
 
 },
 
-})
+});
+
+
+export const fulfill = internalAction({
+    args:{ signature: v.string(), payload: v.string()},
+    handler: async (ctx, {signature, payload}) =>{
+        const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
+
+
+        try {
+
+            const event = stripe.webhooks.constructEvent(
+                payload, 
+                signature, 
+                webhookSecret);
+    
+    
+            const session = event.data.object as Stripe.Checkout.Session;
+
+            if(event.type === "checkout.session.completed"){
+                //const orgId = session.metadata.orgId;
+                console.log("Checkout Completed");
+                return {success: true};
+            }
+
+            
+        } catch (error) {
+            console.error(error);
+            return {success: false};
+        }
+    }
+});
