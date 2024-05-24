@@ -29,31 +29,32 @@ export const OrgSidebar = () => {
     orgId: organization?.id,
   });
 
+
+const [pending, setPending] = useState(false);
 const portal = useAction(api.stripe.portal);
 const pay = useAction(api.stripe.pay);
 
-const [pending, setPending] = useState(false);
 
   const onClick = async () => {
- if(!organization?.id) return
- 
-    setPending(true);
-    try{
-     const action = isSubscribed ? portal : pay;
-     const redirectUrl = await action({ orgId: organization.id });
-    window.location.href = redirectUrl
-
-    } 
-    catch (error) {
-      toast.error("An error occurred. Please try again.");
-    }
+    if(!organization?.id) return
     
-    
-    finally {
-      setPending(false);
-    }
+        setPending(true);
+        try{
+        const action = isSubscribed ? portal : pay;
+        const redirectUrl = await action({ orgId: organization.id });
+        window.location.href = redirectUrl
 
-  }
+        } 
+        catch (error) {
+          toast.error("An error occurred. Please try again.");
+        }
+        
+        
+        finally {
+          setPending(false);
+        }
+
+      }
 
   return (
     <div className="hidden lg:flex flex-col space-y-6 w-[206px] pl-5 pt-5">
